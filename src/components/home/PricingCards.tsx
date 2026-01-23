@@ -31,8 +31,9 @@ interface Product {
 
 interface PricingCardsProps {
   isLoggedIn: boolean;
+  selectedProduct: string | null;
+  onClearSelection: () => void;
 }
-
 /* ------------------------------------------------------------------ */
 
 export default function PricingCards({ isLoggedIn }: PricingCardsProps) {

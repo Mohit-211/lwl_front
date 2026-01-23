@@ -44,8 +44,7 @@ export default function HomePage() {
       <div ref={pricingRef}>
         <PricingCards
           selectedProduct={selectedProduct}
-          onClearSelection={() => setSelectedProduct(null)}
-        />
+          onClearSelection={() => setSelectedProduct(null)} isLoggedIn={false}        />
       </div>
 
       <FAQ />
