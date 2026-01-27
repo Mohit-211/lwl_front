@@ -114,21 +114,21 @@ export const CreateOrder = async (
   );
 };
 // capture payment 
-// export const captureOrder = async (
-//   package_id: string
-// ): Promise<AxiosResponse<any>> => {
-//   return axios.post(
-//     "https://api.lifeworthlivingfilm.com/api/v1/payment/createOrder",
-//     { package_id },
-//     {
-//       headers: {
-//         "x-access-token": token,
-//         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-//         role_id: "6",
-//       },
-//     }
-//   );
-// };
+export const captureOrderApi = async (
+  orderId: string
+): Promise<AxiosResponse<any>> => {
+  return axios.post(
+    "https://api.lifeworthlivingfilm.com/api/v1/payment/captureOrder",
+    { orderId },
+    {
+      headers: {
+        "x-access-token": token,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        role_id: "6",
+      },
+    }
+  );
+};
 export const getPaypalPaymentStatus = async (
   token_ID: string,
 ): Promise<AxiosResponse<any>> => {
@@ -143,13 +143,47 @@ export const getPaypalPaymentStatus = async (
     }
   );
 };
+export const PricingCard = async () => {
+  try {
+    const response = await axios.get(
+      "https://api.lifeworthlivingfilm.com/api/v1/package/get",
+      {
+        headers: {
+          "x-access-token": token,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API response error:", error);
+    throw error;
+  }
+};
+// contact us
+export const ContactUsAPI = async (
+  name: string,
+  email: string,
+  query: string
+): Promise<AxiosResponse<any>> => {
+  return axios.post(
+    "https://api.lifeworthlivingfilm.com/api/v1/contactUs",
+    { name, email, query },
+  );
+};
 
-
-
-
-
-
-
-
-
-
+export const GetALlVideos = async () => {
+  try {
+    const response = await axios.get(
+      "https://api.lifeworthlivingfilm.com/api/v1/video/get",
+      // {
+      //   headers: {
+      //     "x-access-token": token,
+      //   },
+      // }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("API response error:", error);
+    throw error;
+  }
+};

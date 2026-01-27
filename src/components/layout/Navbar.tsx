@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, GetProfile } from "@/lib/api";
 
 interface User {
   id: number;
@@ -28,43 +28,51 @@ export default function Navbar() {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    }
+    GetProfile().then((res) => {
+      console.log(res, "===>>")
+      setUser(res?.data);
 
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    }).catch((e) => {
+      console.log(e, "erorr")
+    })
+    // function handleClickOutside(event: MouseEvent) {
+    //   if (
+    //     dropdownRef.current &&
+    //     !dropdownRef.current.contains(event.target as Node)
+    //   ) {
+    //     setOpen(false);
+    //   }
+    // }
+
+    // if (open) {
+    //   document.addEventListener("mousedown", handleClickOutside);
+    // }
+    // return () => {
+    //   document.removeEventListener("mousedown", handleClickOutside);
+    // };
   }, [open]);
 
-  // Fetch auth state on mount + route change
-  useEffect(() => {
-    async function fetchMe() {
-      try {
-        const res = await apiFetch("/api/auth/me");
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    }
 
-    fetchMe();
-  }, [pathname]);
+  // Fetch auth state on mount + route change
+  // useEffect(() => {
+  //   async function fetchMe() {
+  //     try {
+  //       const res = await apiFetch("/api/auth/me");
+  //       if (res.ok) {
+  //         const data = await res.json();
+  //         setUser(data.user);
+  //       } else {
+  //         setUser(null);
+  //       }
+  //     } catch {
+  //       setUser(null);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+
+  //   fetchMe();
+  // }, [pathname]);
 
   async function handleLogout() {
     await apiFetch("/api/auth/logout", { method: "POST" });
@@ -78,7 +86,7 @@ export default function Navbar() {
       <header className="sticky top-0 z-50 h-[72px] bg-gray-950 border-b border-white/10" />
     );
   }
-
+  console.log(user, "user")
   return (
     <header className="sticky top-0 z-50 bg-gray-950 border-b border-white/10">
       <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -90,7 +98,7 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-6 md:gap-8">
           <NavLink href="/checkout" label="Pricing" pathname={pathname} />
-          {user && <NavLink href="/watch" label="Watch" pathname={pathname} />}
+          {user && <NavLink href="/dashboard" label="Watch" pathname={pathname} />}
 
           {/* AUTH SECTION */}
           {!loading && !user && (
@@ -188,9 +196,8 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`text-sm font-medium transition-colors ${
-        active ? "text-amber-400" : "text-white/70 hover:text-white"
-      }`}
+      className={`text-sm font-medium transition-colors ${active ? "text-amber-400" : "text-white/70 hover:text-white"
+        }`}
     >
       {label}
     </Link>

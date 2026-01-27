@@ -1,5 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import type { LucideIcon } from "lucide-react";
+import { Play, Download, Users, CheckCircle2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,19 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Play, Download, Users, CheckCircle2 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { CreateOrder, PricingCard } from "@/lib/api";
 
-/* ------------------------------------------------------------------ */
-/* Types */
-/* ------------------------------------------------------------------ */
+/* ================= TYPES ================= */
 
 type ProductId = "stream_pass" | "personal_download" | "group_license";
 
 interface Product {
   id: ProductId;
+  packageId: string;
   icon: LucideIcon;
   title: string;
   subtitle: string;
@@ -31,68 +33,144 @@ interface Product {
 
 interface PricingCardsProps {
   isLoggedIn: boolean;
-  selectedProduct: string | null;
-  onClearSelection: () => void;
 }
-/* ------------------------------------------------------------------ */
+
+/* ================= COMPONENT ================= */
 
 export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
   const router = useRouter();
 
-  const products: Product[] = [
-    {
-      id: "stream_pass",
-      icon: Play,
-      title: "72-Hour Stream Pass",
-      subtitle: "Personal or Group Viewing",
-      price: 7.99,
-      features: [
-        "Stream on this site",
-        "Starts immediately after purchase",
-        "Expires 72 hours after purchase",
-        "Permitted: personal or group viewing",
-      ],
-      highlight: false,
-    },
-    {
-      id: "personal_download",
-      icon: Download,
-      title: "Download",
-      subtitle: "Personal Use",
-      price: 11.99,
-      features: [
-        "Download to your device",
-        "Watch anytime offline",
-        "Personal use license",
-        "Instant access",
-      ],
-      highlight: true,
-    },
-    {
-      id: "group_license",
-      icon: Users,
-      title: "Group License",
-      subtitle: "Annual Internal (12 months)",
-      price: 49.99,
-      features: [
-        "Download for in-person screenings",
-        "Unlimited screenings for 12 months",
-        "For organizational use",
-        "Includes Group License PDF",
-      ],
-      highlight: false,
-    },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const handlePurchaseClick = (productId: ProductId) => {
+  /* ================= FETCH PRICING ================= */
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchPricing() {
+      try {
+        const res = await PricingCard();
+        console.log(res,"res")
+
+        if (!res || !res.success || !Array.isArray(res.data)) {
+          throw new Error("Invalid pricing response");
+        }
+
+        const mapped: Product[] = res.data.map((item: any) => {
+          let parsedFeatures: string[] = [];
+
+          try {
+            parsedFeatures = item.features
+              ? JSON.parse(item.features)
+              : [];
+          } catch {
+            parsedFeatures = [];
+          }
+
+          return {
+            id:
+              item.license_type === "stream"
+                ? "stream_pass"
+                : item.license_type === "download"
+                  ? "personal_download"
+                  : "group_license",
+
+            packageId: String(item.id),
+
+            icon:
+              item.license_type === "stream"
+                ? Play
+                : item.license_type === "download"
+                  ? Download
+                  : Users,
+
+            title: item.name,
+            subtitle: item.description || "",
+
+            price: Number(item.price),
+
+            features: parsedFeatures,
+
+            highlight: item.license_type === "download",
+          };
+        });
+
+
+        console.log(mapped, "mapped")
+        if (isMounted) {
+          setProducts(mapped);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load pricing");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchPricing();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  /* ================= PAYPAL ================= */
+
+  async function handlePurchase(product: Product) {
     if (!isLoggedIn) {
       toast.info("Please log in to continue");
-      router.push(`/auth/login?redirect=/checkout?product=${productId}`);
+      router.push("/auth/login");
       return;
     }
 
-    router.push(`/checkout?product=${productId}`);
-  };
+    try {
+      setProcessingId(product.packageId);
+console.log(product.packageId,"product.packageId")
+      const res = await CreateOrder(product.packageId);
+
+      if (!res?.data?.success) {
+        throw new Error(res?.data?.message || "Order failed");
+      }
+
+      const approveUrl = res.data.data?.approveUrl;
+
+      if (!approveUrl) {
+        throw new Error("Missing PayPal approval URL");
+      }
+
+      window.location.href = approveUrl;
+    } catch (err: any) {
+      console.log(err?.response?.data?.message);
+      toast.error(err?.message || "Payment failed");
+    } finally {
+      setProcessingId(null);
+    }
+  }
+
+  /* ================= UI STATES ================= */
+
+  if (loading) {
+    return (
+      <div className="py-24 text-center text-[#f5f0e8]">
+        Loading pricing options...
+      </div>
+    );
+  }
+
+  if (!products.length) {
+    return (
+      <div className="py-24 text-center text-[#f5f0e8]">
+        No pricing options available
+      </div>
+    );
+  }
+
+  /* ================= UI ================= */
 
   return (
     <div className="py-24 px-6 bg-[#1a1a2e]" id="pricing">
@@ -112,10 +190,11 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
 
             return (
               <Card
-                key={product.id}
-                className={`bg-[#0a0a15] border-2 transition-all hover:scale-105 ${
-                  product.highlight ? "border-[#c9a227]" : "border-[#f5f0e8]/10"
-                }`}
+                key={product.packageId}
+                className={`bg-[#0a0a15] border-2 transition-all hover:scale-105 ${product.highlight
+                    ? "border-[#c9a227]"
+                    : "border-[#f5f0e8]/10"
+                  }`}
               >
                 <CardHeader>
                   <div className="p-3 bg-[#c9a227]/10 rounded-lg w-fit mb-4">
@@ -134,28 +213,33 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
                     <span className="text-4xl font-bold text-[#c9a227]">
                       ${product.price}
                     </span>
-                    <span className="text-sm text-[#f5f0e8]/50 ml-1">CAD</span>
+                    <span className="text-sm text-[#f5f0e8]/50 ml-1">
+                      CAD
+                    </span>
                   </div>
                 </CardHeader>
 
                 <CardContent>
                   <ul className="space-y-3 mb-6">
-                    {product.features.map((f, i) => (
+                    {product.features.map((feature, i) => (
                       <li
                         key={i}
                         className="flex items-start gap-2 text-sm text-[#f5f0e8]/80"
                       >
                         <CheckCircle2 className="w-4 h-4 text-[#c9a227]" />
-                        {f}
+                        {feature}
                       </li>
                     ))}
                   </ul>
 
                   <Button
-                    onClick={() => handlePurchaseClick(product.id)}
+                    onClick={() => handlePurchase(product)}
+                    disabled={processingId === product.packageId}
                     className="w-full bg-[#c9a227] text-[#1a1a2e]"
                   >
-                    Subscribe
+                    {processingId === product.packageId
+                      ? "Processing..."
+                      : "Subscribe"}
                   </Button>
                 </CardContent>
               </Card>

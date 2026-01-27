@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ContactUsAPI } from "@/lib/api";
+import { toast, Toaster } from "sonner";
 
 /* ------------------------------------------------------------------ */
 /* Types */
@@ -19,6 +21,28 @@ interface FAQItem {
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await ContactUsAPI(name, email, query);
+      toast.success("Your message has been sent!");
+      setName("");
+      setEmail("");
+      setQuery("");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const faqs: FAQItem[] = [
     {
@@ -92,9 +116,8 @@ export default function FAQ() {
                   </span>
 
                   <ChevronDown
-                    className={`w-5 h-5 text-[#c9a227] flex-shrink-0 transition-transform duration-300 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-5 h-5 text-[#c9a227] flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -117,15 +140,56 @@ export default function FAQ() {
           })}
         </div>
 
-        <div className="mt-12 text-center">
+
+
+        <div className="mt-12 text-center max-w-md mx-auto">
+           <Toaster position="top-right" richColors />
           <p className="text-[#f5f0e8]/60 mb-4">Still have questions?</p>
-          <a
-            href="mailto:support@lifeworthlivingfilm.com"
-            className="text-[#c9a227] hover:text-[#a87f1e] font-medium transition-colors"
+
+          <form
+            className="flex flex-col gap-4 bg-[#1a1a1a] p-6 rounded-lg shadow-md"
+            onSubmit={handleSubmit}
           >
-            support@lifeworthlivingfilm.com
-          </a>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              className="px-4 py-2 rounded border border-gray-600 bg-[#0d0d0d] text-white placeholder-gray-400 focus:outline-none focus:border-[#c9a227]"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              className="px-4 py-2 rounded border border-gray-600 bg-[#0d0d0d] text-white placeholder-gray-400 focus:outline-none focus:border-[#c9a227]"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            <textarea
+              name="query"
+              placeholder="Your Question / Message"
+              rows={4}
+              className="px-4 py-2 rounded border border-gray-600 bg-[#0d0d0d] text-white placeholder-gray-400 focus:outline-none focus:border-[#c9a227]"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              required
+            ></textarea>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-[#c9a227] hover:bg-[#a87f1e] text-black font-medium py-2 rounded transition-colors disabled:opacity-50"
+            >
+              {loading ? "Sending..." : "Submit"}
+            </button>
+          </form>
         </div>
+
       </div>
     </div>
   );
