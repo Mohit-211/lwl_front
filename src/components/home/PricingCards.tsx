@@ -14,12 +14,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CreateOrder, PricingCard } from "@/lib/api";
+import { CreateOrder, GetProfile, PricingCard } from "@/lib/api";
 
 /* ================= TYPES ================= */
 
 type ProductId = "stream_pass" | "personal_download" | "group_license";
-
+interface UserPackage {
+  id: number;
+  package_id: number;
+  is_active: boolean;
+  purchase_date: string;
+  expiry_date: string | null;
+  // package_user: PackageUser;
+}
 interface Product {
   id: ProductId;
   packageId: string;
@@ -39,20 +46,36 @@ interface PricingCardsProps {
 
 export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
   const router = useRouter();
+  const [userPackages, setUserPackages] = useState<UserPackage[]>([]);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   /* ================= FETCH PRICING ================= */
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await GetProfile(); // res: { data: GetProfileResponse }
+        console.log(res, "profile data");
 
+        // Save user packages into state
+        setUserPackages(res.data.user_package || []);
+      } catch (err) {
+        console.error(err, "Error fetching profile");
+      }
+    };
+
+    fetchProfile();
+  }, []);
+  console.log(userPackages, "==>")
   useEffect(() => {
     let isMounted = true;
 
     async function fetchPricing() {
       try {
         const res = await PricingCard();
-        console.log(res,"res")
+        console.log(res, "res")
 
         if (!res || !res.success || !Array.isArray(res.data)) {
           throw new Error("Invalid pricing response");
@@ -130,7 +153,7 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
 
     try {
       setProcessingId(product.packageId);
-console.log(product.packageId,"product.packageId")
+      console.log(product.packageId, "product.packageId")
       const res = await CreateOrder(product.packageId);
 
       if (!res?.data?.success) {
@@ -170,7 +193,8 @@ console.log(product.packageId,"product.packageId")
     );
   }
 
-  /* ================= UI ================= */
+  const hasAnyPackage = userPackages.length > 0;
+
 
   return (
     <div className="py-24 px-6 bg-[#1a1a2e]" id="pricing">
@@ -192,8 +216,8 @@ console.log(product.packageId,"product.packageId")
               <Card
                 key={product.packageId}
                 className={`bg-[#0a0a15] border-2 transition-all hover:scale-105 ${product.highlight
-                    ? "border-[#c9a227]"
-                    : "border-[#f5f0e8]/10"
+                  ? "border-[#c9a227]"
+                  : "border-[#f5f0e8]/10"
                   }`}
               >
                 <CardHeader>
@@ -234,13 +258,16 @@ console.log(product.packageId,"product.packageId")
 
                   <Button
                     onClick={() => handlePurchase(product)}
-                    disabled={processingId === product.packageId}
-                    className="w-full bg-[#c9a227] text-[#1a1a2e]"
+                    disabled={hasAnyPackage || processingId === product.packageId}
+                    className="w-full bg-[#c9a227] text-[#1a1a2e] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {processingId === product.packageId
-                      ? "Processing..."
-                      : "Subscribe"}
+                    {hasAnyPackage
+                      ? "Already Subscribed"
+                      : processingId === product.packageId
+                        ? "Processing..."
+                        : "Subscribe"}
                   </Button>
+
                 </CardContent>
               </Card>
             );

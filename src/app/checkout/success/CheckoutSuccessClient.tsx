@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { captureOrderApi, getPaypalPaymentStatus } from "@/lib/api";
+import { captureOrderApi, getPaypalPaymentStatus, GetProfile } from "@/lib/api";
 
 export default function CheckoutSuccessClient() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function CheckoutSuccessClient() {
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   /* ------------------------------------------------------------------ */
-  /* 1️⃣ Capture Payment */
+  /* Capture Payment Mutation */
   /* ------------------------------------------------------------------ */
   const captureMutation = useMutation({
     mutationFn: async (token: string) => {
@@ -29,19 +29,7 @@ export default function CheckoutSuccessClient() {
     },
     onSuccess: (res) => {
       const status = res?.data?.payment_status;
-      console.log("Capture status:", status);
-
-      if (status === "SUCCESS") {
-        setPaymentStatus("SUCCESS");
-        stopPolling();
-        router.replace("/dashboard");
-      } else if (status === "FAILED") {
-        setPaymentStatus("FAILED");
-        stopPolling();
-      } else {
-        setPaymentStatus("PENDING");
-        startPolling();
-      }
+      handlePaymentStatus(status);
     },
     onError: (err) => {
       console.error("Capture failed:", err);
@@ -51,25 +39,17 @@ export default function CheckoutSuccessClient() {
   });
 
   /* ------------------------------------------------------------------ */
-  /* 2️⃣ Poll Payment Status */
+  /* Poll Payment Status */
   /* ------------------------------------------------------------------ */
   const pollPaymentStatus = async () => {
     if (!token_ID) return;
 
     try {
       const res = await getPaypalPaymentStatus(token_ID);
-      const status = res?.data?.payment_status;
+      const status = res?.data?.data?.payment_status;
       console.log("Polled status:", status);
 
-      setPaymentStatus(status);
-
-      if (status === "SUCCESS") {
-        stopPolling();
-        router.replace("/dashboard");
-      } else if (status === "FAILED") {
-        stopPolling();
-      }
-      // If PENDING, keep polling
+      handlePaymentStatus(status);
     } catch (err) {
       console.error("Polling error:", err);
     }
@@ -88,7 +68,29 @@ export default function CheckoutSuccessClient() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* 3️⃣ Check Payment Status on Mount (tab re-open / refresh) */
+  /* Handle Payment Status */
+  /* ------------------------------------------------------------------ */
+  const handlePaymentStatus = (status: string) => {
+    switch (status) {
+      case "SUCCESS":
+        setPaymentStatus("SUCCESS");
+        stopPolling();
+        setTimeout(() => router.replace("/dashboard"), 1000);
+        break;
+      case "FAILED":
+        setPaymentStatus("FAILED");
+        stopPolling();
+        break;
+      case "PENDING":
+      default:
+        setPaymentStatus("PENDING");
+        startPolling();
+        break;
+    }
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Check Initial Payment Status on Mount */
   /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!token_ID) return;
@@ -96,18 +98,13 @@ export default function CheckoutSuccessClient() {
     const checkStatusOnLoad = async () => {
       try {
         const res = await getPaypalPaymentStatus(token_ID);
-        console.log(res?.data?.data?.payment_status,"res===>>")
         const status = res?.data?.data?.payment_status;
         console.log("Initial status:", status);
 
-        if (status === "SUCCESS") {
-          setPaymentStatus("SUCCESS");
-          stopPolling();
-          router.replace("/dashboard");
-        } else if (status === "FAILED") {
-          setPaymentStatus("FAILED");
-          stopPolling();
+        if (status === "SUCCESS" || status === "FAILED") {
+          handlePaymentStatus(status);
         } else {
+          // If not completed, capture the order
           captureMutation.mutate(token_ID);
         }
       } catch (err) {
@@ -122,7 +119,21 @@ export default function CheckoutSuccessClient() {
       stopPolling();
     };
   }, [token_ID]);
+ useEffect(() => {
+  if (paymentStatus === "SUCCESS") {
+    const fetchProfile = async () => {
+      try {
+        const profile = await GetProfile();
+        console.log("User profile after payment:", profile);
+        // You can set state here if needed
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
 
+    fetchProfile();
+  }
+}, [paymentStatus]); // Run whenever paymentStatus changes
   /* ------------------------------------------------------------------ */
   /* UI */
   /* ------------------------------------------------------------------ */
