@@ -1,4 +1,6 @@
 import React from 'react';
+import DonateBanner from '../DonateButton/DonateButton';
+import DonateButton from '../DonateButton/DonateButton';
 
 export default function Description() {
   return (

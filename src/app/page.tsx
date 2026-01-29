@@ -6,7 +6,7 @@ import Trailer from "@/components/home/Trailer";
 import Description from "@/components/home/Description";
 import PricingCards from "@/components/home/PricingCards";
 import FAQ from "@/components/home/FAQ";
-
+import DonateButton from "@/components/DonateButton/DonateButton";
 export default function HomePage() {
   const trailerRef = useRef<HTMLDivElement | null>(null);
   const pricingRef = useRef<HTMLDivElement | null>(null);
@@ -25,13 +25,16 @@ export default function HomePage() {
           pricingRef.current?.scrollIntoView({ behavior: "smooth" })
         }
       />
-
+     
       <div ref={trailerRef}>
         <Trailer />
       </div>
+     <DonateButton showBanner={true} />
 
       <Description />
-
+<div className="fixed bottom-6 right-6 z-50">
+        <DonateButton />
+      </div>
       <div ref={pricingRef}>
         <PricingCards isLoggedIn={isLoggedIn} />
       </div>

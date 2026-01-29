@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, GetProfile } from "@/lib/api";
-
+import Logo from "../../../public/logo2.png"
+import Image from "next/image";
 interface User {
   id: number;
   email: string;
@@ -91,9 +92,16 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 bg-gray-950 border-b border-white/10">
       <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="text-lg font-semibold text-amber-400">
-          Life Worth Living
-        </Link>
+        <Link href="/" className="flex flex-col items-center text-center">
+    <Image
+      src={Logo}// Replace with your logo path
+      alt="Life Worth Living Logo"
+      width={140}      // Adjust size
+      height={80}
+      className="mt-2 hover:scale-105 transition-transform duration-200"
+    />
+    <span className="text-lg font-semibold text-amber-400">Life Worth Living</span>
+  </Link>
 
         {/* Right side */}
         <div className="flex items-center gap-6 md:gap-8">

@@ -205,3 +205,19 @@ export const DownloadVimeoVideos = async (
     throw error;
   }
 };
+
+export const DonationPaymentApi = async (
+  amount: number
+): Promise<AxiosResponse<any>> => {
+  return axios.post(
+    "https://api.lifeworthlivingfilm.com/api/v1//payment/donation",
+    { amount },
+    {
+      headers: {
+        "x-access-token": token,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        role_id: "6",
+      },
+    }
+  );
+};

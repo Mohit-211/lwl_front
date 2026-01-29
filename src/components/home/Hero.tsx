@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Play, Download, Users } from "lucide-react";
+import DonateButton from "../DonateButton/DonateButton";
 
 interface HeroProps {
   onScrollToTrailer: () => void;
@@ -26,6 +27,7 @@ export default function Hero({
 
       {/* Spacer for poster visibility */}
       <div className="flex-1" />
+
 
       {/* CTA Section */}
       <div className="relative z-10 px-6 pb-32 pt-6">
