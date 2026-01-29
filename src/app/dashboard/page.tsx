@@ -8,7 +8,7 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { format, differenceInHours, isPast } from "date-fns";
-import { GetALlVideos, GetProfile, PricingCard } from "@/lib/api";
+import { DownloadVimeoVideos, GetALlVideos, GetProfile, PricingCard } from "@/lib/api";
 import WatchPage from "../watch/page";
 import { toast, Toaster } from "sonner";
 import DonateButton from "@/components/DonateButton/DonateButton";
@@ -69,6 +69,28 @@ export default function DashboardPage() {
 
   const getPricingForPackage = (pkg: any) =>
     pricingPackages.find((p) => p.id === pkg.package_id) || null;
+const handleDownload = async (vimeo_ID: string) => {
+  try {
+    const response = await DownloadVimeoVideos(vimeo_ID);
+
+    const blob = new Blob([response.data], {
+      type: "video/mp4",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `vimeo-${vimeo_ID}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Download failed:", error);
+  }
+};
 
   return (
     <>
@@ -114,9 +136,9 @@ export default function DashboardPage() {
 
                   const hoursRemaining = pkg.expiry_date
                     ? differenceInHours(
-                        new Date(pkg.expiry_date),
-                        new Date()
-                      )
+                      new Date(pkg.expiry_date),
+                      new Date()
+                    )
                     : null;
 
                   return (
@@ -134,11 +156,10 @@ export default function DashboardPage() {
                       "
                     >
                       <span
-                        className={`absolute top-4 right-4 text-xs font-medium px-3 py-1 rounded-full ${
-                          isExpired
-                            ? "bg-red-500/15 text-red-400"
-                            : "bg-green-500/15 text-green-400"
-                        }`}
+                        className={`absolute top-4 right-4 text-xs font-medium px-3 py-1 rounded-full ${isExpired
+                          ? "bg-red-500/15 text-red-400"
+                          : "bg-green-500/15 text-green-400"
+                          }`}
                       >
                         {isExpired ? "Expired" : "Active"}
                       </span>
@@ -167,7 +188,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
 
-                       
+
                       </div>
                     </div>
                   );
@@ -212,13 +233,12 @@ export default function DashboardPage() {
 
                       <button
                         onClick={() =>
-                          toast.success("Download feature coming soon")
+                          handleDownload(video.vimeo_video_id)
                         }
-                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition ${
-                          isDisabled
-                            ? "bg-gray-600/40 text-gray-400 cursor-not-allowed"
-                            : "bg-[#c9a227] text-[#1a1a2e] hover:bg-[#b79a20]"
-                        }`}
+                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-md text-sm font-medium transition ${isDisabled
+                          ? "bg-gray-600/40 text-gray-400 cursor-not-allowed"
+                          : "bg-[#c9a227] text-[#1a1a2e] hover:bg-[#b79a20] cursor-pointer"
+                          }`}
                       >
                         <Download className="w-4 h-4" />
                         Download
@@ -228,11 +248,11 @@ export default function DashboardPage() {
                 ))}
               </div>
             </section>
-            
+
           </div>
         </div>
       )}
-      
+
 
       {/* ================= PACKAGE MODAL ================= */}
       {selectedPackage && (

@@ -187,19 +187,16 @@ export const GetALlVideos = async () => {
     throw error;
   }
 };
-export const DownloadVimeoVideos = async (
-   vimeo_ID: string,
-) => {
+export const DownloadVimeoVideos = async (vimeo_ID: string) => {
   try {
     const response = await axios.get(
-      `https://api.lifeworthlivingfilm.com/api/v1/download/${vimeo_ID}`,
-      // {
-      //   headers: {
-      //     "x-access-token": token,
-      //   },
-      // }
+      `https://api.lifeworthlivingfilm.com/api/v1/video/download/${vimeo_ID}`,
+      {
+        responseType: "blob", // 🔥 MOST IMPORTANT
+      }
     );
-    return response.data;
+
+    return response; // return full response, NOT response.data
   } catch (error) {
     console.error("API response error:", error);
     throw error;
