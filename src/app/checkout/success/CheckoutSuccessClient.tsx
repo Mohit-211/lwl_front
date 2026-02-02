@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { captureOrderApi, getPaypalPaymentStatus } from "@/lib/api";
+import { MailCheck } from "lucide-react";
 
 export default function CheckoutSuccessClient() {
   const router = useRouter();
@@ -14,25 +15,24 @@ export default function CheckoutSuccessClient() {
     "PROCESSING" | "PENDING" | "SUCCESS" | "FAILED" | null
   >(null);
 
+  const [showEmailModal, setShowEmailModal] = useState(false);
+
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   /* ------------------------------------------------------------------ */
-  /* Capture Payment Mutation */
+  /* Capture Payment */
   /* ------------------------------------------------------------------ */
   const captureMutation = useMutation({
     mutationFn: async (token: string) => {
       const res = await captureOrderApi(token);
-      return res.data; // { success, status, message, data }
+      return res.data;
     },
-    onMutate: () => {
-      setPaymentStatus("PROCESSING");
-    },
+    onMutate: () => setPaymentStatus("PROCESSING"),
     onSuccess: (res) => {
       const status = res?.data?.payment_status;
       handlePaymentStatus(status);
     },
-    onError: (err) => {
-      console.error("Capture failed:", err);
+    onError: () => {
       setPaymentStatus("FAILED");
       stopPolling();
     },
@@ -43,15 +43,12 @@ export default function CheckoutSuccessClient() {
   /* ------------------------------------------------------------------ */
   const pollPaymentStatus = async () => {
     if (!token_ID) return;
-
     try {
       const res = await getPaypalPaymentStatus(token_ID);
       const status = res?.data?.data?.payment_status;
-      console.log("Polled status:", status);
-
       handlePaymentStatus(status);
     } catch (err) {
-      console.error("Polling error:", err);
+      console.error(err);
     }
   };
 
@@ -68,19 +65,23 @@ export default function CheckoutSuccessClient() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* Handle Payment Status */
+  /* Handle Status */
   /* ------------------------------------------------------------------ */
   const handlePaymentStatus = (status: string) => {
     switch (status) {
       case "SUCCESS":
         setPaymentStatus("SUCCESS");
         stopPolling();
-        setTimeout(() => router.replace("/"), 1000);
+
+        setTimeout(() => setShowEmailModal(true), 800);
+        setTimeout(() => router.replace("/"), 5000);
         break;
+
       case "FAILED":
         setPaymentStatus("FAILED");
         stopPolling();
         break;
+
       case "PENDING":
       default:
         setPaymentStatus("PENDING");
@@ -90,86 +91,109 @@ export default function CheckoutSuccessClient() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* Check Initial Payment Status on Mount */
+  /* Initial Load */
   /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!token_ID) return;
 
-    const checkStatusOnLoad = async () => {
+    const init = async () => {
       try {
         const res = await getPaypalPaymentStatus(token_ID);
         const status = res?.data?.data?.payment_status;
-        console.log("Initial status:", status);
 
         if (status === "SUCCESS" || status === "FAILED") {
           handlePaymentStatus(status);
         } else {
-          // If not completed, capture the order
           captureMutation.mutate(token_ID);
         }
-      } catch (err) {
-        console.error("Initial status check failed:", err);
+      } catch {
         captureMutation.mutate(token_ID);
       }
     };
 
-    checkStatusOnLoad();
-
-    return () => {
-      stopPolling();
-    };
+    init();
+    return () => stopPolling();
   }, [token_ID]);
-//  useEffect(() => {
-//   if (paymentStatus === "SUCCESS") {
-//     const fetchProfile = async () => {
-//       try {
-//         const profile = await GetProfile();
-//         console.log("User profile after payment:", profile);
-//         // You can set state here if needed
-//       } catch (error) {
-//         console.error("Failed to fetch profile:", error);
-//       }
-//     };
 
-//     fetchProfile();
-//   }
-// }, [paymentStatus]); // Run whenever paymentStatus changes
   /* ------------------------------------------------------------------ */
   /* UI */
   /* ------------------------------------------------------------------ */
   return (
-    <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center px-6">
-      <div className="bg-[#0a0a15] border border-[#f5f0e8]/10 rounded-lg p-8 text-center w-full max-w-md">
-        <h1 className="text-3xl font-bold text-[#f5f0e8] mb-4">
-          Finalizing Your Purchase
-        </h1>
+    <>
+      {/* Main Screen */}
+      <div className="min-h-screen bg-[#1a1a2e] flex items-center justify-center px-6">
+        <div className="bg-[#0a0a15] border border-[#f5f0e8]/10 rounded-lg p-8 text-center w-full max-w-md">
+          <h1 className="text-3xl font-bold text-[#f5f0e8] mb-4">
+            Finalizing Your Purchase
+          </h1>
 
-        <p className="text-[#f5f0e8]/70 mb-6">
-          Please don’t close this page. We’re confirming your payment.
-        </p>
-
-        {(paymentStatus === "PROCESSING" || paymentStatus === "PENDING") && (
-          <div className="animate-spin h-10 w-10 border-b-2 border-[#c9a227] mx-auto mb-4" />
-        )}
-
-        {paymentStatus === "PENDING" && (
-          <p className="text-yellow-400 text-sm mt-4">
-            Payment is pending. Checking again…
+          <p className="text-[#f5f0e8]/70 mb-6">
+            Please don’t close this page. We’re confirming your payment.
           </p>
-        )}
 
-        {paymentStatus === "FAILED" && (
-          <p className="text-red-500 text-sm mt-4">
-            Payment failed. Please try again.
-          </p>
-        )}
+          {(paymentStatus === "PROCESSING" ||
+            paymentStatus === "PENDING") && (
+              <div className="animate-spin h-10 w-10 border-b-2 border-[#c9a227] mx-auto mb-4" />
+            )}
 
-        {paymentStatus === "SUCCESS" && (
-          <p className="text-green-400 text-sm mt-4">
-            Payment successful! Redirecting…
-          </p>
-        )}
+          {paymentStatus === "FAILED" && (
+            <p className="text-red-500 text-sm mt-4">
+              Payment failed. Please try again.
+            </p>
+          )}
+
+          {paymentStatus === "SUCCESS" && (
+            <p className="text-green-400 text-sm mt-4">
+              Payment successful! Redirecting…
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* 🔹 DUMMY TEST BUTTON */}
+      {/* <button
+        onClick={() => setShowEmailModal(true)}
+        className="fixed bottom-6 right-6 z-40 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg text-sm"
+      >
+        Test Email Modal
+      </button> */}
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="relative bg-[#0a0a15] border border-[#f5f0e8]/10 rounded-xl p-8 w-full max-w-sm text-center">
+
+            {/* Animated Email Icon */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+              <div className="relative flex items-center justify-center">
+                <span className="absolute inline-flex h-20 w-20 rounded-full bg-[#c9a227]/20 animate-ping" />
+                <div className="h-16 w-16 rounded-full bg-[#c9a227] flex items-center justify-center animate-bounce">
+                  <MailCheck className="text-black w-8 h-8" />
+                </div>
+              </div>
+            </div>
+
+            <h2 className="text-xl font-semibold text-[#f5f0e8] mt-10 mb-3">
+               Check your email 📩
+            </h2>
+
+            <p className="text-[#f5f0e8]/70 text-sm mb-6">
+              Your video has been successfully sent to your email.
+            Open the email to watch your video .
+
+            If you don’t see it within a few minutes, please check your spam folder.
+            </p>
+
+
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="w-full bg-[#c9a227] hover:bg-[#b8951f] text-black font-medium py-2.5 rounded-lg transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
