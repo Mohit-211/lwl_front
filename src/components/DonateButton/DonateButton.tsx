@@ -117,7 +117,7 @@ export default function DonateButton({ showBanner = false }: DonateButtonProps) 
             </div>
 
             {/* Preset Amounts */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
+            {/* <div className="grid grid-cols-3 gap-3 mb-6">
               {[50, 100, 150].map((v) => (
                 <button
                   key={v}
@@ -127,7 +127,7 @@ export default function DonateButton({ showBanner = false }: DonateButtonProps) 
                   ${v}
                 </button>
               ))}
-            </div>
+            </div> */}
 
             {/* Actions */}
             <div className="flex gap-3">
