@@ -75,7 +75,7 @@ export default function CheckoutSuccessClient() {
       case "SUCCESS":
         setPaymentStatus("SUCCESS");
         stopPolling();
-        setTimeout(() => router.replace("/dashboard"), 1000);
+        setTimeout(() => router.replace("/"), 1000);
         break;
       case "FAILED":
         setPaymentStatus("FAILED");

@@ -14,7 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CreateOrder, GetProfile, PricingCard } from "@/lib/api";
+import { CreateOrder, PricingCard } from "@/lib/api";
+// import { CreateOrder, GetProfile, PricingCard } from "@/lib/api";
 
 /* ================= TYPES ================= */
 
@@ -53,21 +54,21 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   /* ================= FETCH PRICING ================= */
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await GetProfile(); // res: { data: GetProfileResponse }
-        console.log(res, "profile data");
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const res = await GetProfile(); // res: { data: GetProfileResponse }
+  //       console.log(res, "profile data");
 
-        // Save user packages into state
-        setUserPackages(res.data.user_package || []);
-      } catch (err) {
-        console.error(err, "Error fetching profile");
-      }
-    };
+  //       // Save user packages into state
+  //       setUserPackages(res.data.user_package || []);
+  //     } catch (err) {
+  //       console.error(err, "Error fetching profile");
+  //     }
+  //   };
 
-    fetchProfile();
-  }, []);
+  //   fetchProfile();
+  // }, []);
   console.log(userPackages, "==>")
   useEffect(() => {
     let isMounted = true;
@@ -145,11 +146,11 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
   /* ================= PAYPAL ================= */
 
   async function handlePurchase(product: Product) {
-    if (!isLoggedIn) {
-      toast.info("Please log in to continue");
-      router.push("/auth/login");
-      return;
-    }
+    // if (!isLoggedIn) {
+    //   toast.info("Please log in to continue");
+    //   router.push("/auth/login");
+    //   return;
+    // }
 
     try {
       setProcessingId(product.packageId);

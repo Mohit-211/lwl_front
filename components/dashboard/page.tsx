@@ -96,9 +96,9 @@ const handleDownload = async (vimeo_ID: string) => {
     <>
       <Toaster position="top-right" richColors />
 
-      {userPackages.length === 0 ? (
+      {/* {userPackages.length === 0 ? (
         <WatchPage />
-      ) : (
+      ) : ( */}
         <div className="min-h-screen bg-gradient-to-b from-[#181830] to-[#101020] px-6 py-16">
           <div className="max-w-7xl mx-auto">
 
@@ -251,11 +251,11 @@ const handleDownload = async (vimeo_ID: string) => {
 
           </div>
         </div>
-      )}
+      {/* )} */}
 
 
       {/* ================= PACKAGE MODAL ================= */}
-      {selectedPackage && (
+      {/* {selectedPackage && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-[#121225] rounded-2xl p-8 max-w-md w-full border border-white/10 relative">
             <button
@@ -296,7 +296,7 @@ const handleDownload = async (vimeo_ID: string) => {
             </Card>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

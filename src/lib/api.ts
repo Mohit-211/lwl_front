@@ -81,22 +81,22 @@ export const SendOTPAPI = async (value1: string) => {
     config
   );
 };
-export const GetProfile = async () => {
-  try {
-    const response = await axios.get(
-      "https://api.lifeworthlivingfilm.com/api/v1/user/profile",
-      {
-        headers: {
-          "x-access-token": token,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("API response error:", error);
-    throw error;
-  }
-};
+// export const GetProfile = async () => {
+//   try {
+//     const response = await axios.get(
+//       "https://api.lifeworthlivingfilm.com/api/v1/user/profile",
+//       {
+//         headers: {
+//           "x-access-token": token,
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     console.error("API response error:", error);
+//     throw error;
+//   }
+// };
 // create order 
 export const CreateOrder = async (
   package_id: string
@@ -120,13 +120,13 @@ export const captureOrderApi = async (
   return axios.post(
     "https://api.lifeworthlivingfilm.com/api/v1/payment/captureOrder",
     { orderId },
-    {
-      headers: {
-        "x-access-token": token,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        role_id: "6",
-      },
-    }
+    // {
+    //   headers: {
+    //     "x-access-token": token,
+    //     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    //     role_id: "6",
+    //   },
+    // }
   );
 };
 export const getPaypalPaymentStatus = async (
@@ -134,24 +134,24 @@ export const getPaypalPaymentStatus = async (
 ): Promise<AxiosResponse<any>> => {
   return axios.get(
     `https://api.lifeworthlivingfilm.com/api/v1/payment/status/${token_ID}`,
-    {
-      headers: {
-        "x-access-token": token,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        role_id: "6",
-      },
-    }
+    // {
+    //   headers: {
+    //     "x-access-token": token,
+    //     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    //     role_id: "6",
+    //   },
+    // }
   );
 };
 export const PricingCard = async () => {
   try {
     const response = await axios.get(
       "https://api.lifeworthlivingfilm.com/api/v1/package/get",
-      {
-        headers: {
-          "x-access-token": token,
-        },
-      }
+      // {
+      //   headers: {
+      //     "x-access-token": token,
+      //   },
+      // }
     );
     return response.data;
   } catch (error) {
@@ -209,12 +209,12 @@ export const DonationPaymentApi = async (
   return axios.post(
     "https://api.lifeworthlivingfilm.com/api/v1//payment/donation",
     { amount },
-    {
-      headers: {
-        "x-access-token": token,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        role_id: "6",
-      },
-    }
+    // {
+    //   headers: {
+    //     "x-access-token": token,
+    //     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    //     role_id: "6",
+    //   },
+    // }
   );
 };
