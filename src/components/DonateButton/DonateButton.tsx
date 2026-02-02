@@ -118,13 +118,13 @@ export default function DonateButton({ showBanner = false }: DonateButtonProps) 
 
             {/* Preset Amounts */}
             <div className="grid grid-cols-3 gap-3 mb-6">
-              {[500, 1000, 2500].map((v) => (
+              {[50, 100, 150].map((v) => (
                 <button
                   key={v}
                   onClick={() => setAmount(String(v))}
                   className="rounded-lg border border-gray-300 py-2 text-sm hover:border-yellow-400 hover:text-yellow-400 transition"
                 >
-                  ₹{v}
+                  ${v}
                 </button>
               ))}
             </div>
