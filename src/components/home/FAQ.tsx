@@ -78,7 +78,7 @@ export default function FAQ() {
     {
       question: "Need help?",
       answer:
-        "Email us at support@lifeworthlivingfilm.com and we’ll be happy to assist you.",
+        "Email us at info@epcc.ca and we’ll be happy to assist you.",
     },
   ];
 

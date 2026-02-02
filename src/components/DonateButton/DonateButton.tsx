@@ -98,7 +98,7 @@ export default function DonateButton({ showBanner = false }: DonateButtonProps) 
             {/* Amount Input */}
             <div className="relative mb-6">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-yellow-400 text-lg font-medium">
-              ₹
+              $
             </span>
 
               <input

@@ -263,10 +263,10 @@ export default function PricingCards({ isLoggedIn }: PricingCardsProps) {
                     className="w-full bg-[#c9a227] text-[#1a1a2e] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {hasAnyPackage
-                      ? "Already Subscribed"
+                      ? "Already Buyed"
                       : processingId === product.packageId
                         ? "Processing..."
-                        : "Subscribe"}
+                        : "Buy"}
                   </Button>
 
                 </CardContent>

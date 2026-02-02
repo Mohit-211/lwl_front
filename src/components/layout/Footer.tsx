@@ -69,7 +69,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-3">Contact</h4>
             <ul className="space-y-2 text-sm text-white/60">
-              <li>Email: support@lifeworthlivingfilm.com</li>
+              <li>Email: info@epcc.ca</li>
               <li>For group licenses or custom quotes</li>
             </ul>
           </div>
