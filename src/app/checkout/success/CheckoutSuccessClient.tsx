@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { captureOrderApi, getPaypalPaymentStatus, GetProfile } from "@/lib/api";
+import { captureOrderApi, getPaypalPaymentStatus } from "@/lib/api";
 
 export default function CheckoutSuccessClient() {
   const router = useRouter();
@@ -119,21 +119,21 @@ export default function CheckoutSuccessClient() {
       stopPolling();
     };
   }, [token_ID]);
- useEffect(() => {
-  if (paymentStatus === "SUCCESS") {
-    const fetchProfile = async () => {
-      try {
-        const profile = await GetProfile();
-        console.log("User profile after payment:", profile);
-        // You can set state here if needed
-      } catch (error) {
-        console.error("Failed to fetch profile:", error);
-      }
-    };
+//  useEffect(() => {
+//   if (paymentStatus === "SUCCESS") {
+//     const fetchProfile = async () => {
+//       try {
+//         const profile = await GetProfile();
+//         console.log("User profile after payment:", profile);
+//         // You can set state here if needed
+//       } catch (error) {
+//         console.error("Failed to fetch profile:", error);
+//       }
+//     };
 
-    fetchProfile();
-  }
-}, [paymentStatus]); // Run whenever paymentStatus changes
+//     fetchProfile();
+//   }
+// }, [paymentStatus]); // Run whenever paymentStatus changes
   /* ------------------------------------------------------------------ */
   /* UI */
   /* ------------------------------------------------------------------ */
