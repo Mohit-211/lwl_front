@@ -190,7 +190,7 @@ export default function LegalPage() {
             </ul>
             <p className="mt-4">
               To exercise these rights, contact us at
-              support@lifeworthlivingfilm.com
+              info@epcc.ca
             </p>
           </div>
         </section>
@@ -216,7 +216,7 @@ export default function LegalPage() {
             </ul>
             <p className="mt-4">
               Refund requests must be submitted to
-              support@lifeworthlivingfilm.com with your order details.
+              info@epcc.ca with your order details.
             </p>
 
             <h3 className="text-xl font-semibold text-[#f5f0e8] mt-8">
@@ -247,7 +247,7 @@ export default function LegalPage() {
               Refund Process
             </h3>
             <p>
-              To request a refund, email support@lifeworthlivingfilm.com with:
+              To request a refund, email info@epcc.ca with:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Your order number and email used for purchase</li>
@@ -278,10 +278,10 @@ export default function LegalPage() {
           <p className="text-[#f5f0e8]/70">
             For questions about these policies, contact us at{" "}
             <a
-              href="mailto:support@lifeworthlivingfilm.com"
+              href="mailto:info@epcc.ca"
               className="text-[#c9a227] hover:text-[#a87f1e]"
             >
-              support@lifeworthlivingfilm.com
+              info@epcc.ca
             </a>
           </p>
           <p className="text-[#f5f0e8]/50 text-sm mt-4">
