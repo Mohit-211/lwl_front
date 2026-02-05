@@ -81,7 +81,7 @@ export default function CheckoutSuccessClient() {
         setPaymentStatus("SUCCESS");
         stopPolling();
 
-        setTimeout(() => setShowEmailModal(true), 800);
+        setTimeout(() => setShowEmailModal(true), 3000);
         setTimeout(() => router.replace("/"), 5000);
         break;
 
@@ -143,8 +143,8 @@ export default function CheckoutSuccessClient() {
 
           {(paymentStatus === "PROCESSING" ||
             paymentStatus === "PENDING") && (
-            <div className="animate-spin h-10 w-10 border-b-2 border-[#c9a227] mx-auto mb-4" />
-          )}
+              <div className="animate-spin h-10 w-10 border-b-2 border-[#c9a227] mx-auto mb-4" />
+            )}
 
           {paymentStatus === "FAILED" && (
             <p className="text-red-500 text-sm mt-4">
@@ -174,6 +174,7 @@ export default function CheckoutSuccessClient() {
                 </div>
               </div>
             </div>
+
 
             <h2 className="text-xl font-semibold text-[#f5f0e8] mt-10 mb-3">
               {paymentType === "DONATION"
